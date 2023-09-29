@@ -1,0 +1,110 @@
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col col-md-6">
+                <h5 class="card-title">
+                    {{ '::Menu:Customers' | abpLocalization }}
+                </h5>
+            </div>
+            <div class="text-end col col-md-6"></div>
+
+            <div class="text-lg-end pt-2">
+                <button *abpPermission="'Order.Customers.Create'" id="create" class="btn btn-primary" type="button" (click)="createCustomer()">
+                    <i class="fa fa-plus me-1"></i>
+                    <span>{{ "::NewCustomer" | abpLocalization }}</span>
+                </button>
+            </div>
+
+
+        </div>
+    </div>
+    <div class="card-body">
+        <ngx-datatable [rows]="customer.items" [count]="customer.totalCount" [list]="list" default>
+            <ngx-datatable-column [name]="'::Actions' | abpLocalization" [maxWidth]="150" [sortable]="false">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div ngbDropdown container="body" class="d-inline-block">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown"
+                            aria-haspopup="true" ngbDropdownToggle>
+                            <i class="fa fa-cog me-1"></i>{{ '::Actions' | abpLocalization }}
+                        </button>
+                        <div ngbDropdownMenu>
+                            <button *abpPermission="'Order.Customers.Edit'" ngbDropdownItem (click)="editCustomer(row.id)">
+                                {{ '::Edit' | abpLocalization }}
+                            </button>
+                            <button *abpPermission="'Order.Customers.Delete'" ngbDropdownItem (click)="delete(row.id)">
+                                {{ '::Delete' | abpLocalization }}
+                            </button>
+                        </div>
+                    </div>
+                </ng-template>
+            </ngx-datatable-column>
+
+            <ngx-datatable-column [name]="'::customerName' | abpLocalization" prop="customerName"></ngx-datatable-column>
+            <ngx-datatable-column [name]="'::RiskLimit' | abpLocalization" prop="riskLimit">
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                    {{ row.riskLimit | currency:'TRY'}}
+                </ng-template>
+            </ngx-datatable-column>
+            <ngx-datatable-column [name]="'::billingAddress' | abpLocalization"
+                prop="billingAddress"></ngx-datatable-column>
+        </ngx-datatable>
+    </div>
+</div>
+
+
+<abp-modal [(visible)]="isModalOpen">
+    <ng-template #abpHeader>
+        <h3>{{ (selectedCustomer.id ? '::Edit' : '::NewCustomer' ) | abpLocalization }}</h3>
+    </ng-template>
+
+    <ng-template #abpBody>
+
+        <form [formGroup]="form" (ngSubmit)="save()">
+            <div class="mt-2">
+                <label for="customerName">{{ '::customerName' | abpLocalization }}</label><span> * </span>
+                <input type="text" id="customerName" class="form-control" formControlName="customerName" autofocus />
+            </div>
+
+            <div class="mt-2">
+                <label for="customer-risk-limit">{{ '::RiskLimit' | abpLocalization }}</label><span> * </span>
+
+
+                <div class="input-group">
+                    <span class="input-group-text">₺</span>
+                    <input type="number" step="1000" id="customer-risk-limit" class="form-control"
+                        formControlName="riskLimit" />
+
+                </div>
+
+            </div>
+
+            <div class="mt-2">
+                <label for="billing-Address">{{ '::billingAddress' | abpLocalization }}</label><span> * </span>
+                <input type="text" id="billing-Address" class="form-control" formControlName="billingAddress"
+                    autofocus />
+            </div>
+
+        </form>
+
+    </ng-template>
+
+
+
+
+
+
+
+
+
+    <ng-template #abpFooter>
+        <button type="button" class="btn btn-secondary" abpClose>
+            {{ '::Close' | abpLocalization }}
+        </button>
+
+        <button class="btn btn-primary" (click)="save()" [disabled]="form.invalid">
+            <i class="fa fa-check mr-1"></i>
+            {{ '::Save' | abpLocalization }}
+        </button>
+
+    </ng-template>
+</abp-modal>
