@@ -76,6 +76,7 @@ export class MasterComponent implements OnInit{
 
 
   save() {
+    debugger
     if (this.form.invalid) {
       return;
     }
@@ -101,6 +102,30 @@ export class MasterComponent implements OnInit{
 	    });
   }
 
+  Shipped(id:any){
+    this.masterService.get(id).subscribe((master) => {
+      this.selectedMaster = master
+      let data = {
+        customerId : this.selectedMaster.customerId,
+        orderDate : this.selectedMaster.orderDate,
+        productId : this.selectedMaster.productId,
+        shippingAddress: this.selectedMaster.shippingAddress,
+        isShipped : true
+      }
+      this.masterService.update(this.selectedMaster.id, data).subscribe((res) => {
+        const masterStreamCreator = (query) => this.masterService.getList(query);
+
+        this.list.hookToQuery(masterStreamCreator).subscribe((response) => {
+          this.master = response;
+        });
+      })
+      // this.selectedMaster = master;
+      // this.selectedMaster.isShipped = true;
+      // this.masterService.update(master.id)
+      // this.buildForm();
+      // this.isModalOpen = true;
+    });
+  }
 
 
 }
