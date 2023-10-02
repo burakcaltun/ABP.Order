@@ -61,7 +61,7 @@ export class ProductComponent implements OnInit{
 
   buildForm() {
     this.form = this.fb.group({
-      productName: ['', Validators.required],
+      productName: [this.selectedProduct.productName, Validators.required],
       amount: [null, Validators.required],
       price: ['', Validators.required]
     });
@@ -72,14 +72,20 @@ export class ProductComponent implements OnInit{
       return;
     }
 
-    const request = this.selectedProduct.id
-      ? this.productService.update(this.selectedProduct.id, this.form.value)
-      : this.productService.create(this.form.value);
-
-    request.subscribe(() => {
-      this.isModalOpen = false;
-      this.form.reset();
-      this.list.get();
-    });
+    if (this.selectedProduct.id) {
+      this.productService
+        .update(this.selectedProduct.id, this.form.value)
+        .subscribe(() => {
+          this.isModalOpen = false;
+          this.form.reset();
+          this.list.get();
+        });
+    } else {
+      this.productService.create(this.form.value).subscribe(() => {
+        this.isModalOpen = false;
+        this.form.reset();
+        this.list.get();
+      });
+    }
   }
 }

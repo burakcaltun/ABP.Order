@@ -55,13 +55,13 @@ export class CustomerComponent implements OnInit{
     this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
       if (status === Confirmation.Status.confirm) {
         this.customerService.delete(id).subscribe(() => this.list.get());
-      }
+      } 
     });
   }
 
   buildForm() {
     this.form = this.fb.group({
-      customerName: ['', Validators.required],
+      customerName: [this.selectedCustomer.customerName || '', Validators.required],
       riskLimit: [null, Validators.required],
       billingAddress: ['', Validators.required]
     });
@@ -72,17 +72,20 @@ export class CustomerComponent implements OnInit{
       return;
     }
 
-    const request = this.selectedCustomer.id
-      ? this.customerService.update(this.selectedCustomer.id, this.form.value)
-      : this.customerService.create(this.form.value);
-
-    
-
-
-    request.subscribe(() => {
-      this.isModalOpen = false;
-      this.form.reset();
-      this.list.get();
-    });
+    if (this.selectedCustomer.id) {
+      this.customerService
+        .update(this.selectedCustomer.id, this.form.value)
+        .subscribe(() => {
+          this.isModalOpen = false;
+          this.form.reset();
+          this.list.get();
+        });
+    } else {
+      this.customerService.create(this.form.value).subscribe(() => {
+        this.isModalOpen = false;
+        this.form.reset();
+        this.list.get();
+      });
+    }
   }
 }

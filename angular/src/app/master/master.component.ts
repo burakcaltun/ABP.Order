@@ -4,7 +4,6 @@ import { MasterService, MasterDto, CustomerLookupDto, ProductLookupDto } from '@
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { CustomerDto } from '@proxy/customers';
 import { Observable, map } from 'rxjs';
 
 @Component({
@@ -16,23 +15,25 @@ import { Observable, map } from 'rxjs';
 export class MasterComponent implements OnInit{
   master = { items: [], totalCount: 0 } as PagedResultDto<MasterDto>;
 
-  isModalOpen = false;
+
 
   form: FormGroup;
 
   selectedMaster = {} as MasterDto;
 
   customers$ : Observable<CustomerLookupDto[]>;
+
   products$ : Observable<ProductLookupDto[]>;
+
+  isModalOpen = false;
+
   constructor(
     public readonly list: ListService,
     private masterService: MasterService,
     private fb: FormBuilder,
     private confirmation: ConfirmationService
   ) {
-    this.customers$ = masterService.getCustomerLookup().pipe(map((r) => 
-    r.items
-    ))
+    this.customers$ = masterService.getCustomerLookup().pipe(map((r) => r.items))
   
     this.products$ = masterService.getProductLookup().pipe(map((r) => r.items))
   }
@@ -61,14 +62,13 @@ export class MasterComponent implements OnInit{
 
   buildForm() {
     this.form = this.fb.group({
-      customerId: [this.selectedMaster.customerId || '', Validators.required],
+      customerId: [this.selectedMaster.customerId || null, Validators.required],
       orderDate: [
         this.selectedMaster.orderDate ? new Date(this.selectedMaster.orderDate) : null,
         Validators.required,
       ],
       shippingAddress: [this.selectedMaster.shippingAddress || null, Validators.required],
-      productId: [this.selectedMaster.productId || '', Validators.required],
-      isShipped: [this.selectedMaster.isShipped || '', Validators.required],
+      productId: [this.selectedMaster.productId || null, Validators.required],
       
 
     });
@@ -80,21 +80,16 @@ export class MasterComponent implements OnInit{
       return;
     }
 
-    if (this.selectedMaster.id) {
-      this.masterService
-        .update(this.selectedMaster.id, this.form.value)
-        .subscribe(() => {
-          this.isModalOpen = false;
-          this.form.reset();
-          this.list.get();
-        });
-    } else {
-      this.masterService.create(this.form.value).subscribe(() => {
-        this.isModalOpen = false;
-        this.form.reset();
-        this.list.get();
-      });
-    }
+    const request = this.selectedMaster.id
+    ? this.masterService.update(this.selectedMaster.id, this.form.value)
+    : this.masterService.create(this.form.value);
+
+  request.subscribe(() => {
+    this.isModalOpen = false;
+    this.form.reset();
+    this.list.get();
+  });
+
   }
 
   delete(id: string) {
@@ -105,5 +100,7 @@ export class MasterComponent implements OnInit{
           }
 	    });
   }
+
+
 
 }
